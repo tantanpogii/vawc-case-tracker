@@ -2,13 +2,27 @@
 // Include config.php for global settings (e.g., database connection)
 require_once 'config.php'; 
 
-// Default page is Dashboard if no page is specified
-$page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+// Check if the session is already started, if not, start it
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Check if the user is logged in, except for the login page
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    // If not logged in, redirect to the login page
+    if ($_GET['page'] != 'login') {
+        header('Location: index.php?page=login');
+        exit();
+    }
+}
+
+// Default page is Login if no page is specified
+$page = isset($_GET['page']) ? $_GET['page'] : 'login'; // Default to 'login' page
 
 // Include the appropriate controller based on the requested page
 switch ($page) {
     case 'login':
-        require_once 'controllers/AuthController.php';
+        require_once 'controllers/authController.php';
         $authController = new AuthController();
         $authController->login();
         break;
@@ -38,5 +52,4 @@ switch ($page) {
         $dashboardController->index();
         break;
 }
-
 ?>
